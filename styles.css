@@ -1,0 +1,404 @@
+/* Modern minimalist styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+:root {
+    --primary: #3a86ff;
+    --secondary: #8338ec;
+    --dark: #242730;
+    --light: #f8f9fa;
+    --gray: #dee2e6;
+    --success: #38b000;
+    --border-radius: 12px;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-strong: 0 8px 15px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease-in-out;
+}
+
+body {
+    background-color: var(--light);
+    color: var(--dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+h1 {
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 0;
+    font-size: 1.8rem;
+}
+
+h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 1rem;
+    color: var(--dark);
+}
+
+/* Container layout */
+.container {
+    display: flex;
+    max-width: 1400px;
+    margin: 1.5rem auto;
+    min-height: calc(100vh - 150px);
+    gap: 1.5rem;
+    padding: 0 1rem;
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 300px;
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.fossil-selector, .component-controls, .info-panel {
+    background-color: var(--light);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+}
+
+select {
+    width: 100%;
+    padding: 0.7rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--gray);
+    background-color: white;
+    font-size: 1rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1em;
+    transition: var(--transition);
+}
+
+select:hover, select:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(58, 134, 255, 0.2);
+}
+
+button {
+    padding: 0.7rem 1.2rem;
+    border-radius: var(--border-radius);
+    border: none;
+    background-color: var(--primary);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+button:hover {
+    background-color: #2a75e8;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Viewer container */
+.viewer-container {
+    flex: 1;
+    position: relative;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#model-container {
+    width: 100%;
+    flex: 1;
+    background: radial-gradient(circle, #f8f9fa 0%, #edf2f7 100%);
+}
+
+.viewer-controls {
+    display: none;
+    justify-content: center;
+    padding: 1rem;
+    background-color: white;
+    border-top: 1px solid #eaeaea;
+    gap: 0.8rem;
+}
+
+.viewer-controls button {
+    padding: 0.6rem 1rem;
+    background-color: white;
+    color: var(--dark);
+    border: 1px solid var(--gray);
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.viewer-controls button:hover {
+    background-color: var(--light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Component toggles */
+.component-toggle {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.7rem;
+    position: relative;
+    padding-left: 30px;
+}
+
+.component-toggle input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.component-toggle input + label {
+    cursor: pointer;
+    font-size: 0.95rem;
+    position: relative;
+}
+
+.component-toggle input + label:before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--gray);
+    border-radius: 4px;
+    background-color: white;
+}
+
+.component-toggle input:checked + label:after {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background-color: var(--primary);
+}
+
+.component-toggle input:checked + label:before {
+    border-color: var(--primary);
+}
+
+/* Info panel */
+#fossil-info {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Tab styling */
+.info-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.info-tab {
+    padding: 8px 15px;
+    cursor: pointer;
+    margin-right: 5px;
+    border-radius: 4px 4px 0 0;
+    font-weight: 500;
+    transition: var(--transition);
+    border-bottom: 3px solid transparent;
+    font-size: 14px;
+}
+
+.info-tab:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.info-tab.active {
+    border-bottom: 3px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.info-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.info-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Adjust info panel headings */
+#fossil-info h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+#fossil-info h4 {
+    color: var(--secondary-color);
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+#fossil-info ul {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+#fossil-info p {
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+/* Adjust other info panel styles */
+#fossil-info h3 {
+    color: var(--primary);
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+#fossil-info h4 {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    color: var(--dark);
+    font-weight: 600;
+}
+
+#fossil-info ul {
+    padding-left: 1.5rem;
+    margin-bottom: 0.8rem;
+}
+
+#fossil-info li {
+    margin-bottom: 0.4rem;
+}
+
+#fossil-info p {
+    margin-bottom: 0.8rem;
+}
+
+#fossil-info strong {
+    color: var(--dark);
+    font-weight: 600;
+}
+
+#fossil-info em {
+    display: block;
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    text-align: right;
+}
+
+/* Labels */
+.fossil-label {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0.9;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+footer {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+    margin-top: 2rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 1.5rem;
+    }
+    
+    .viewer-container {
+        height: 500px;
+    }
+}
+
+/* Floating viewer controls toolbar */
+.floating-controls {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 8px 15px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    z-index: 10;
+    backdrop-filter: blur(5px);
+}
+
+.floating-controls button {
+    padding: 8px 12px;
+    background-color: white;
+    color: var(--dark);
+    border: 1px solid var(--gray);
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.floating-controls button:hover {
+    background-color: var(--light);
+    border-color: var(--primary);
+    color: var(--primary);
+} 

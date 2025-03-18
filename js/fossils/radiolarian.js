@@ -20,99 +20,81 @@ export function createRadiolarianModel(scene) {
 
 // Create the siliceous skeleton
 function createSiliceousSkeleton(group) {
-    // Create a scientifically accurate representation of the siliceous skeleton
+    // Create a scientifically accurate but lighter representation of the siliceous skeleton
     const skeletonGroup = new THREE.Group();
     
-    // Material properties for opaline silica (SiO2·nH2O)
+    // Material properties for opaline silica - adjusted for better visibility
     const latticeMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0xf8f8f8, // Opaline silica is white to translucent
+        color: 0xCCDDEE, // Light blue-gray color for better visibility
         transparent: true,
-        opacity: 0.7,
+        opacity: 0.9, // Increased opacity
         roughness: 0.2,
-        metalness: 0.1
+        metalness: 0.2 // Slight increase in metalness for highlight reflection
     });
     
-    // Create outer framework - reduced polygon count for better performance
-    const outerGeometry = new THREE.IcosahedronGeometry(1.0, 1); // Reduced from detail level 2 to 1
+    // Create a simplified but recognizable lattice structure
+    // Use a wireframe icosahedron with visible lines for the main structure
+    const outerGeometry = new THREE.IcosahedronGeometry(0.8, 1);
     const outerSkeleton = new THREE.Mesh(
         outerGeometry,
-        new THREE.MeshPhysicalMaterial({
-            color: 0xf8f8f8,
+        new THREE.MeshBasicMaterial({
+            color: 0xB0C4DE, // Light steel blue for better visibility
             transparent: true,
-            opacity: 0.3,
+            opacity: 0.9, // Increased opacity
             wireframe: true,
             wireframeLinewidth: 2
         })
     );
     skeletonGroup.add(outerSkeleton);
     
-    // Create inner framework - reduced polygon count
-    const innerGeometry = new THREE.IcosahedronGeometry(0.7, 1); // Reduced from detail level 2 to 1
+    // Create inner framework with better visibility
+    const innerGeometry = new THREE.IcosahedronGeometry(0.6, 1);
     const innerSkeleton = new THREE.Mesh(
         innerGeometry,
-        new THREE.MeshPhysicalMaterial({
-            color: 0xf8f8f8,
+        new THREE.MeshBasicMaterial({
+            color: 0xA0B8D0, // Slightly darker blue for contrast
             transparent: true,
-            opacity: 0.2,
+            opacity: 0.7,
             wireframe: true,
             wireframeLinewidth: 1
         })
     );
     skeletonGroup.add(innerSkeleton);
     
-    // Add structural bars representing radial support structures
-    // Optimized: reduced number of bars from 14 to 10 key positions
-    const barPositions = [
-        [new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0.7, 0)],
-        [new THREE.Vector3(0, -1, 0), new THREE.Vector3(0, -0.7, 0)],
-        [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0.7, 0, 0)],
-        [new THREE.Vector3(-1, 0, 0), new THREE.Vector3(-0.7, 0, 0)],
-        [new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, 0.7)],
-        [new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 0, -0.7)],
-        [new THREE.Vector3(0.7, 0.7, 0), new THREE.Vector3(0.5, 0.5, 0)],
-        [new THREE.Vector3(-0.7, 0.7, 0), new THREE.Vector3(-0.5, 0.5, 0)],
-        [new THREE.Vector3(0.7, -0.7, 0), new THREE.Vector3(0.5, -0.5, 0)],
-        [new THREE.Vector3(-0.7, -0.7, 0), new THREE.Vector3(-0.5, -0.5, 0)]
+    // Add a few key structural bars for visual interest instead of full lattice
+    // Use just 12 strategic bars representing main structural elements
+    const keyPositions = [
+        [0, 1, 0],
+        [0, -1, 0],
+        [1, 0, 0],
+        [-1, 0, 0],
+        [0, 0, 1],
+        [0, 0, -1]
     ];
     
-    barPositions.forEach(([start, end]) => {
-        const direction = new THREE.Vector3().subVectors(end, start);
+    keyPositions.forEach(pos => {
+        const normalizedPos = new THREE.Vector3(pos[0], pos[1], pos[2]).normalize();
+        const outerPoint = normalizedPos.clone().multiplyScalar(0.8);
+        const innerPoint = normalizedPos.clone().multiplyScalar(0.6);
+        
+        // Create a connecting bar between layers
+        const direction = new THREE.Vector3().subVectors(outerPoint, innerPoint);
         const length = direction.length();
         
-        // Reduced segment count for better performance
-        const barGeometry = new THREE.CylinderGeometry(0.015, 0.015, length, 4); // Reduced from 6 segments to 4
-        barGeometry.translate(0, length / 2, 0);
-        
+        const barGeometry = new THREE.CylinderGeometry(0.025, 0.025, length, 6, 1); // Slightly thicker
         const bar = new THREE.Mesh(barGeometry, latticeMaterial);
-        bar.position.copy(start);
         
-        // Orient the bar to point to the end
-        bar.lookAt(end);
-        bar.rotateX(Math.PI / 2);
+        // Position at midpoint
+        bar.position.copy(innerPoint).add(outerPoint).multiplyScalar(0.5);
+        
+        // Orient correctly
+        bar.quaternion.setFromUnitVectors(
+            new THREE.Vector3(0, 1, 0),
+            direction.normalize()
+        );
         
         skeletonGroup.add(bar);
     });
-    
-    // Add mesh pores (simplified representation)
-    // Reduced number of pores from 40 to 24 for better performance
-    for (let i = 0; i < 24; i++) {
-        const radius = 0.85;
-        const phi = Math.acos(-1 + (2 * i) / 24);
-        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
-        
-        const x = radius * Math.sin(phi) * Math.cos(theta);
-        const y = radius * Math.sin(phi) * Math.sin(theta);
-        const z = radius * Math.cos(phi);
-        
-        // Reduced segment counts for better performance
-        const poreGeometry = new THREE.TorusGeometry(0.08, 0.01, 6, 12); // Reduced from 8,16 to 6,12
-        const pore = new THREE.Mesh(poreGeometry, latticeMaterial);
-        
-        pore.position.set(x, y, z);
-        pore.lookAt(0, 0, 0);
-        
-        skeletonGroup.add(pore);
-    }
     
     group.add(skeletonGroup);
     
@@ -129,65 +111,39 @@ function createSiliceousSkeleton(group) {
     // Add label
     if (typeof addLabel === 'function') {
         const labelsArray = window.labels || [];
-        addLabel(group, labelsArray, 'Siliceous Skeleton', new THREE.Vector3(1.3, 0.3, 0.3), component);
+        addLabel(group, labelsArray, 'Siliceous Skeleton', new THREE.Vector3(1.0, 0.5, 0), component);
     }
     
     return skeletonGroup;
 }
 
-// Create the central capsule (inner part)
+// Create central capsule
 function createCentralCapsule(group) {
-    // Create a simplified but scientifically accurate central capsule
+    // Create a lighter but still accurate central capsule
     const capsuleGroup = new THREE.Group();
     
-    // Outer membrane material
+    // Outer membrane material - golden-yellow as shown in the reference image
     const membraneMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0xf0e0a0,
+        color: 0xd4c170, // Golden color to match reference
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.7,
         roughness: 0.3
     });
     
-    // Create the central capsule - reduced segment count
-    const capsuleGeometry = new THREE.SphereGeometry(0.5, 24, 16); // Reduced from 32,32 to 24,16
+    // Create the central capsule with fewer segments
+    const capsuleGeometry = new THREE.SphereGeometry(0.4, 16, 12); // Reduced geometry
     const capsule = new THREE.Mesh(capsuleGeometry, membraneMaterial);
     capsuleGroup.add(capsule);
     
-    // Add nucleus - reduced segment count
+    // Add nucleus with fewer segments
     const nucleusMaterial = new THREE.MeshStandardMaterial({
-        color: 0xe0c070,
+        color: 0xe8c080,
         roughness: 0.4
     });
     
-    const nucleusGeometry = new THREE.SphereGeometry(0.2, 12, 8); // Reduced from 16,16 to 12,8
+    const nucleusGeometry = new THREE.SphereGeometry(0.2, 8, 6); // Significantly reduced
     const nucleus = new THREE.Mesh(nucleusGeometry, nucleusMaterial);
     capsuleGroup.add(nucleus);
-    
-    // Add organelles (simplified)
-    const organelleMaterial = new THREE.MeshStandardMaterial({
-        color: 0xd0b090,
-        roughness: 0.5
-    });
-    
-    // Reduced number of organelles from 6 to 4
-    for (let i = 0; i < 4; i++) {
-        const size = 0.04 + Math.random() * 0.03;
-        const organelleGeometry = new THREE.SphereGeometry(size, 6, 4); // Reduced from 8,8 to 6,4
-        const organelle = new THREE.Mesh(organelleGeometry, organelleMaterial);
-        
-        // Place organelles around the nucleus within the capsule
-        const distance = 0.2 + Math.random() * 0.15;
-        const phi = Math.random() * Math.PI;
-        const theta = Math.random() * Math.PI * 2;
-        
-        organelle.position.set(
-            distance * Math.sin(phi) * Math.cos(theta),
-            distance * Math.sin(phi) * Math.sin(theta),
-            distance * Math.cos(phi)
-        );
-        
-        capsuleGroup.add(organelle);
-    }
     
     group.add(capsuleGroup);
     
@@ -204,15 +160,15 @@ function createCentralCapsule(group) {
     // Add label
     if (typeof addLabel === 'function') {
         const labelsArray = window.labels || [];
-        addLabel(group, labelsArray, 'Central Capsule', new THREE.Vector3(0, -0.7, 0), component);
+        addLabel(group, labelsArray, 'Central Capsule', new THREE.Vector3(0.2, -0.6, 0.2), component);
     }
     
     return capsuleGroup;
 }
 
-// Create the radial spines
+// Create spines
 function createSpines(group) {
-    // Create simplified but scientifically accurate spines
+    // Create scientifically accurate but optimized radial spines
     const spineGroup = new THREE.Group();
     
     // Material for spines - siliceous like the skeleton
@@ -222,114 +178,58 @@ function createSpines(group) {
         metalness: 0.1
     });
     
-    // Create primary spines (major spines)
+    // Use fewer spines for better performance
     const primarySpinePositions = [
         new THREE.Vector3(0, 1, 0),
         new THREE.Vector3(0, -1, 0),
         new THREE.Vector3(1, 0, 0),
         new THREE.Vector3(-1, 0, 0),
         new THREE.Vector3(0, 0, 1),
-        new THREE.Vector3(0, 0, -1)
+        new THREE.Vector3(0, 0, -1),
+        // Just a few diagonal spines
+        new THREE.Vector3(0.7, 0.7, 0),
+        new THREE.Vector3(-0.7, -0.7, 0),
+        new THREE.Vector3(0, 0.7, -0.7)
     ];
     
-    primarySpinePositions.forEach(position => {
+    // Create an instanced mesh for better performance
+        const spineGeometry = new THREE.CylinderGeometry(
+            0.01, // Tip width
+        0.05, // Base width
+        1.8,  // Length
+        5,    // Even fewer radial segments
+        1     // Height segments
+    );
+    
+    const instancedSpines = new THREE.InstancedMesh(
+        spineGeometry,
+        material,
+        primarySpinePositions.length
+    );
+    
+    const dummy = new THREE.Object3D();
+    
+    primarySpinePositions.forEach((position, index) => {
         const normalizedPos = position.clone().normalize();
         
-        // Create the main spine
-        const length = 1.4 + Math.random() * 0.3;
-        const baseWidth = 0.05;
+        // Position with base at the skeleton surface (0.8 radius) and extending outward
+        const surfacePoint = normalizedPos.clone().multiplyScalar(0.8);
+        dummy.position.copy(surfacePoint);
         
-        // Reduced segment count
-        const spineGeometry = new THREE.CylinderGeometry(
-            baseWidth * 0.3, // Tip
-            baseWidth,       // Base
-            length,
-            6 // Reduced from 8 to 6
+        // Align spine to point outward
+        dummy.quaternion.setFromUnitVectors(
+            new THREE.Vector3(0, 1, 0),
+            normalizedPos
         );
         
-        // Translate geometry so base is at origin
-        spineGeometry.translate(0, length / 2, 0);
+        // Move the spine so that it extends outward from the surface
+        dummy.translateY(1.8 / 2);
         
-        const spine = new THREE.Mesh(spineGeometry, material);
-        spine.position.copy(normalizedPos);
-        
-        // Orient spine to point outward
-        spine.lookAt(new THREE.Vector3(0, 0, 0));
-        spine.rotateX(Math.PI);
-        
-        spineGroup.add(spine);
-        
-        // Add branches to primary spines - reduced number and complexity
-        const numBranches = 2; // Reduced from 2-3 to always 2
-        
-        for (let i = 0; i < numBranches; i++) {
-            const branchOffset = 0.3 + (i * 0.3);
-            const branchLength = 0.15;
-            const branchWidth = baseWidth * 0.3;
-            
-            // Reduced segment count
-            const branchGeometry = new THREE.ConeGeometry(branchWidth, branchLength, 5); // Reduced from 6 to 5
-            const branch = new THREE.Mesh(branchGeometry, material);
-            
-            // Position branch along spine
-            const branchBasePos = normalizedPos.clone().multiplyScalar(1 + branchOffset);
-            branch.position.copy(branchBasePos);
-            
-            // Orient branch perpendicular to spine
-            const branchAngle = (i * Math.PI * 2) / numBranches;
-            const branchDir = new THREE.Vector3(
-                Math.cos(branchAngle),
-                0,
-                Math.sin(branchAngle)
-            );
-            
-            // Get tangent to the sphere at this point for orientation
-            const tangent = new THREE.Vector3().crossVectors(
-                normalizedPos,
-                branchDir
-            ).normalize();
-            
-            branch.lookAt(branchBasePos.clone().add(tangent));
-            
-            spineGroup.add(branch);
-        }
+        dummy.updateMatrix();
+        instancedSpines.setMatrixAt(index, dummy.matrix);
     });
     
-    // Create secondary spines (smaller, simpler)
-    // Reduced number from 16 to 10 for better performance
-    for (let i = 0; i < 10; i++) {
-        const phi = Math.acos(-1 + (2 * i) / 10);
-        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
-        
-        const spinePos = new THREE.Vector3();
-        spinePos.setFromSphericalCoords(1, phi, theta);
-        
-        // Skip positions too close to primary spines
-        let tooClose = false;
-        for (const primaryPos of primarySpinePositions) {
-            if (spinePos.distanceTo(primaryPos.clone().normalize()) < 0.3) {
-                tooClose = true;
-                break;
-            }
-        }
-        
-        if (tooClose) continue;
-        
-        // Create a simple spine
-        const length = 0.5 + Math.random() * 0.2;
-        const width = 0.02;
-        
-        // Reduced segment count
-        const geometry = new THREE.ConeGeometry(width, length, 5); // Reduced from 6 to 5
-        const spine = new THREE.Mesh(geometry, material);
-        
-        spine.position.copy(spinePos);
-        spine.lookAt(new THREE.Vector3(0, 0, 0));
-        spine.rotateX(Math.PI);
-        
-        spineGroup.add(spine);
-    }
-    
+    spineGroup.add(instancedSpines);
     group.add(spineGroup);
     
     // Store component data for UI controls
@@ -345,79 +245,65 @@ function createSpines(group) {
     // Add label
     if (typeof addLabel === 'function') {
         const labelsArray = window.labels || [];
-        addLabel(group, labelsArray, 'Radial Spines', new THREE.Vector3(0, 1.5, 0), component);
+        addLabel(group, labelsArray, 'Radial Spines', new THREE.Vector3(0, 1.8, 0), component);
     }
     
     return spineGroup;
 }
 
-// Create axopods (pseudopodia extending from central capsule)
+// Create axopods (extensions)
 function createAxopods(group) {
-    // Create simplified but scientifically accurate axopods
+    // Create lightweight axopods
     const axopodGroup = new THREE.Group();
     
     // Material for axopods
     const material = new THREE.MeshPhysicalMaterial({
         color: 0xd0e8ff,
         transparent: true,
-        opacity: 0.4,
+        opacity: 0.5,
         roughness: 0.2
     });
     
-    // Create axopods with curves - reduced number from 14 to 8
-    for (let i = 0; i < 8; i++) {
-        const phi = Math.acos(-1 + (2 * i) / 8);
+    // Significantly reduce the number of axopods
+    const numAxopods = 6; // Much fewer
+    
+    // Use simpler geometry and instancing for better performance
+    const axopodGeometry = new THREE.CylinderGeometry(0.01, 0.015, 0.8, 4, 1);
+    const instancedAxopods = new THREE.InstancedMesh(
+        axopodGeometry, 
+        material,
+        numAxopods
+    );
+    
+    const dummy = new THREE.Object3D();
+    
+    // Create evenly spaced axopods
+    for (let i = 0; i < numAxopods; i++) {
+        const phi = Math.acos(-1 + (2 * i) / numAxopods);
         const theta = Math.PI * (1 + Math.sqrt(5)) * i;
         
-        const startPoint = new THREE.Vector3();
-        startPoint.setFromSphericalCoords(0.5, phi, theta);
+        // Direction vector from center
+        const direction = new THREE.Vector3();
+        direction.setFromSphericalCoords(1, phi, theta);
         
-        // Create a curved path for the axopod - simplify to quadratic curve
-        const curve = new THREE.QuadraticBezierCurve3(
-            startPoint,
-            startPoint.clone().multiplyScalar(1.7).add(
-                new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.3,
-                    (Math.random() - 0.5) * 0.3,
-                    (Math.random() - 0.5) * 0.3
-                )
-            ),
-            startPoint.clone().multiplyScalar(2.2)
+        // Position starting at central capsule going outward
+        const startPoint = direction.clone().multiplyScalar(0.4);
+        dummy.position.copy(startPoint);
+        
+        // Orient along the radial direction
+        dummy.quaternion.setFromUnitVectors(
+            new THREE.Vector3(0, 1, 0),
+            direction
         );
         
-        // Create tube geometry along the curve - reduced segment counts
-        const tubeGeometry = new THREE.TubeGeometry(
-            curve,
-            8,  // Reduced from 12 to 8 tubularSegments
-            0.015 + Math.random() * 0.01,  // radius
-            5,   // Reduced from 6 to 5 radialSegments
-            false // closed
-        );
+        // Move outward along axis
+        dummy.translateY(0.4);
         
-        const axopod = new THREE.Mesh(tubeGeometry, material);
-        axopodGroup.add(axopod);
-        
-        // Add granules along each axopod - reduced count from 5-10 to 3-5
-        const numGranules = 3 + Math.floor(Math.random() * 2);
-        const granuleMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.6
-        });
-        
-        for (let j = 0; j < numGranules; j++) {
-            const t = j / numGranules;
-            const pos = curve.getPointAt(t);
-            
-            // Use instanced geometry to improve performance
-            const granuleGeometry = new THREE.SphereGeometry(0.005 + Math.random() * 0.005, 4, 3); // Reduced from 4,4 to 4,3
-            const granule = new THREE.Mesh(granuleGeometry, granuleMaterial);
-            granule.position.copy(pos);
-            
-            axopodGroup.add(granule);
-        }
+        dummy.updateMatrix();
+        instancedAxopods.setMatrixAt(i, dummy.matrix);
     }
     
+    axopodGroup.add(instancedAxopods);
     group.add(axopodGroup);
     
     // Store component data for UI controls
@@ -433,7 +319,7 @@ function createAxopods(group) {
     // Add label
     if (typeof addLabel === 'function') {
         const labelsArray = window.labels || [];
-        addLabel(group, labelsArray, 'Axopods', new THREE.Vector3(1.2, -0.8, 0.8), component);
+        addLabel(group, labelsArray, 'Axopods', new THREE.Vector3(1.0, -0.3, 0.8), component);
     }
     
     return axopodGroup;

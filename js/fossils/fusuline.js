@@ -73,28 +73,48 @@ function createSepta(group) {
         side: THREE.DoubleSide
     });
     
-    // Create several curved planes as septa
-    const numSepta = 8;
-    for (let i = 0; i < numSepta; i++) {
-        const angle = (i / numSepta) * Math.PI * 2;
-        const radius = 0.7;
+    // Create spiral-arranged septa inside the shell following fusuline anatomy
+    // Shell dimensions (shell is 1.5 in x-axis, 0.8 in y and z)
+    const shellRadiusX = 1.5;
+    const shellRadiusZ = 0.8;
+    
+    // Create spiral septa that divide the internal space into chambers
+    const numChambers = 8;
+    const maxRadius = 0.65; // Keep septa inside the shell
+    
+    // Calculate spiral points for the septa
+    for (let i = 0; i < numChambers; i++) {
+        // Create a spiral pattern - each septum rotates and gets slightly larger
+        const angle = (i / numChambers) * Math.PI * 6; // Multiple turns of spiral
+        const ratio = i / numChambers;
+        const radius = maxRadius * (0.3 + ratio * 0.7); // Growing radius for spiral effect
         
-        // Create a custom shape for each septum
+        // Calculate position inside the shell
+        const posX = radius * Math.cos(angle);
+        const posZ = radius * Math.sin(angle);
+        
+        // Create the septum shape - make it a curved wall shape
         const shape = new THREE.Shape();
-        shape.moveTo(0, 0);
-        shape.quadraticCurveTo(0.3, 0.4, 0.8, 0.4);
-        shape.lineTo(0.8, -0.4);
-        shape.quadraticCurveTo(0.3, -0.4, 0, 0);
+        
+        // Define the internal wall shape
+        const wallHeight = 0.4 - ratio * 0.1; // Slightly smaller toward center
+        shape.moveTo(0, -wallHeight);
+        shape.quadraticCurveTo(0.2, 0, 0, wallHeight);
+        shape.lineTo(radius * 0.6, wallHeight * 0.8);
+        shape.quadraticCurveTo(radius * 0.7, 0, radius * 0.6, -wallHeight * 0.8);
+        shape.lineTo(0, -wallHeight);
         
         const geometry = new THREE.ShapeGeometry(shape);
         const septum = new THREE.Mesh(geometry, material);
         
-        // Position and rotate the septum
-        septum.position.set(0, 0, 0);
-        septum.rotation.y = angle;
-        septum.position.x = radius * Math.cos(angle);
-        septum.position.z = radius * Math.sin(angle);
-        septum.lookAt(0, 0, 0);
+        // Position and orient the septum within the shell
+        septum.position.set(posX, 0, posZ);
+        
+        // Orient to align with spiral pattern
+        const nextAngle = ((i + 0.5) / numChambers) * Math.PI * 6;
+        const nextPosX = radius * Math.cos(nextAngle);
+        const nextPosZ = radius * Math.sin(nextAngle);
+        septum.lookAt(nextPosX, 0, nextPosZ);
         
         septaGroup.add(septum);
     }
@@ -111,10 +131,10 @@ function createSepta(group) {
     
     group.userData.components.push(component);
     
-    // Add label
+    // Add label for the internal septa
     if (typeof addLabel === 'function') {
         const labelsArray = window.labels || [];
-        addLabel(group, labelsArray, 'Septa', new THREE.Vector3(0, 0.6, 0.7), component);
+        addLabel(group, labelsArray, 'Septa', new THREE.Vector3(0.5, 0.2, 0.5), component);
     }
     
     return septaGroup;
